@@ -15,6 +15,7 @@ namespace EfMigrationTool.View
     {
         private MigrationScanner _migrationScanner;
         private MigrationDecoder _migrationDecoder;
+        private MigrationComparer _migrationComparer;
 
         public string MigrationAssembly { get; set; }
         public string DbConnectionString { get; set; }
@@ -37,10 +38,11 @@ namespace EfMigrationTool.View
 
             _migrationScanner = new MigrationScanner();
             _migrationDecoder = new MigrationDecoder();
-
+            _migrationComparer = new MigrationComparer();
+#if DEBUG
             DbConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=EfMigrationTool.DemoApp.DemoContext;Integrated Security=True";
             MigrationAssembly = "EfMigrationTool.DemoApp.exe";
-
+#endif
             ReadMigrationsFromAssemblyCommand = new RelayCommand(ReadMigrationsFromAssembly);
             ReadMigrationsFromDbCommand = new RelayCommand(ReadMigrationsFromDb);
 
@@ -63,12 +65,7 @@ namespace EfMigrationTool.View
                     var targetMigration = target.FirstOrDefault(m => m.MigrationId == sourceMigration.MigrationId);
                     if(targetMigration != null)
                     {
-                        var sourceEdmx = _migrationDecoder.GetEdmxContentForMigration(sourceMigration.ModelBlobb);
-                        var targetEdmx = _migrationDecoder.GetEdmxContentForMigration(targetMigration.ModelBlobb);
-                        if(sourceEdmx != targetEdmx)
-                        {
-                            compareResult += "Found difference in " + sourceMigration.MigrationId + "." + Environment.NewLine;
-                        }
+                        compareResult = _migrationComparer.CompareMigration(sourceMigration, targetMigration);
                     }
                     else
                     {

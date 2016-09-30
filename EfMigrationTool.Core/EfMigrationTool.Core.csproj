@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MigrationComparer.cs" />
     <Compile Include="MigrationDecoder.cs" />
     <Compile Include="MigrationInfo.cs" />
     <Compile Include="MigrationScanner.cs" />
