@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="MigrationComparer.cs" />
     <Compile Include="MigrationDecoder.cs" />
+    <Compile Include="MigrationFileOperations.cs" />
     <Compile Include="MigrationInfo.cs" />
     <Compile Include="MigrationScanner.cs" />
     <Compile Include="MigrationSource.cs" />

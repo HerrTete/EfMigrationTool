@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Migrations.Infrastructure;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EfMigrationTool.Core;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -16,6 +12,7 @@ namespace EfMigrationTool.View
         private MigrationScanner _migrationScanner;
         private MigrationDecoder _migrationDecoder;
         private MigrationComparer _migrationComparer;
+        private MigrationFileOperations _migrationFileOperations;
 
         public string MigrationAssembly { get; set; }
         public string DbConnectionString { get; set; }
@@ -39,6 +36,8 @@ namespace EfMigrationTool.View
             _migrationScanner = new MigrationScanner();
             _migrationDecoder = new MigrationDecoder();
             _migrationComparer = new MigrationComparer();
+            _migrationFileOperations = new MigrationFileOperations();
+
 #if DEBUG
             DbConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=EfMigrationTool.DemoApp.DemoContext;Integrated Security=True";
             MigrationAssembly = "EfMigrationTool.DemoApp.exe";
@@ -46,7 +45,7 @@ namespace EfMigrationTool.View
             ReadMigrationsFromAssemblyCommand = new RelayCommand(ReadMigrationsFromAssembly);
             ReadMigrationsFromDbCommand = new RelayCommand(ReadMigrationsFromDb);
 
-            DumpAssemblyMigrationCommand = new RelayCommand(()=>DumpMigrationInfo(SelectedAssemblyMigration));
+            DumpAssemblyMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedAssemblyMigration));
             DumpDbMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedDbMigration));
             QuickCompareCommand = new RelayCommand(QuickCompare);
         }
@@ -55,26 +54,16 @@ namespace EfMigrationTool.View
         {
             var compareResult = string.Empty;
 
-            if(DbMigrations.Count > 0 && AssemblyMigrations.Count > 0)
+            if (DbMigrations.Count > 0 && AssemblyMigrations.Count > 0)
             {
-                var source = DbMigrations;
-                var target = AssemblyMigrations;
-
-                foreach(var sourceMigration in source)
-                {
-                    var targetMigration = target.FirstOrDefault(m => m.MigrationId == sourceMigration.MigrationId);
-                    if(targetMigration != null)
-                    {
-                        compareResult = _migrationComparer.CompareMigration(sourceMigration, targetMigration);
-                    }
-                    else
-                    {
-                        compareResult += "Didn't found matching pair for " + sourceMigration.MigrationId + "." + Environment.NewLine;
-                    }
-                }
+                compareResult = _migrationComparer.CompareMigrationSets(DbMigrations, AssemblyMigrations);
+            }
+            else
+            {
+                compareResult = "No migrations found." + Environment.NewLine;
             }
 
-            if(string.IsNullOrEmpty(compareResult))
+            if (string.IsNullOrEmpty(compareResult))
             {
                 compareResult = "No difference found.";
             }
@@ -86,8 +75,7 @@ namespace EfMigrationTool.View
         {
             if (migration != null)
             {
-                var edmxContent = _migrationDecoder.GetEdmxContentForMigration(migration.ModelBlobb);
-                File.WriteAllText(migration.Source.ToString() + "_" + migration.MigrationId + ".edmx", edmxContent);
+                _migrationFileOperations.WriteMigrationToFile(migration);
             }
         }
 
@@ -95,7 +83,7 @@ namespace EfMigrationTool.View
         {
             AssemblyMigrations = _migrationScanner.ScanAssemblyForMigrations(MigrationAssembly);
 
-            if(AssemblyMigrations.Count > 0)
+            if (AssemblyMigrations.Count > 0)
             {
                 SelectedAssemblyMigration = AssemblyMigrations.First();
             }

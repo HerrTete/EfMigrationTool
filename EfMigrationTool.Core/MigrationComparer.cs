@@ -28,5 +28,32 @@ namespace EfMigrationTool.Core
 
             return compareResult;
         }
+
+        public string CompareMigrationSets(List<MigrationInfo> source, List<MigrationInfo> target)
+        {
+            var compareResult = string.Empty;
+
+            if(source.Count == target.Count)
+            {
+                foreach (var sourceMigration in source)
+                {
+                    var targetMigration = target.FirstOrDefault(m => m.MigrationId == sourceMigration.MigrationId);
+                    if (targetMigration != null)
+                    {
+                        compareResult += CompareMigration(sourceMigration, targetMigration);
+                    }
+                    else
+                    {
+                        compareResult += "Didn't found matching pair for " + sourceMigration.MigrationId + "." + Environment.NewLine;
+                    }
+                }
+            }
+            else
+            {
+                compareResult += "MigrationsCount is different." + Environment.NewLine;
+            }
+
+            return compareResult;
+        }
     }
 }
