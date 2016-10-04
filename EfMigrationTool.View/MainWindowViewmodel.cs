@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using EfMigrationTool.Core;
 using GalaSoft.MvvmLight;
@@ -21,6 +22,7 @@ namespace EfMigrationTool.View
         public List<MigrationInfo> AssemblyMigrations { get; set; }
         public List<MigrationInfo> DbMigrations { get; set; }
         public string CompareResult { get; set; }
+        public string MigrationFilePath { get; set; }
 
         public MigrationInfo SelectedAssemblyMigration { get; set; }
         public MigrationInfo SelectedDbMigration { get; set; }
@@ -29,9 +31,10 @@ namespace EfMigrationTool.View
         public RelayCommand ReadMigrationsFromDbCommand { get; set; }
         public RelayCommand DumpAssemblyMigrationCommand { get; set; }
         public RelayCommand DumpDbMigrationCommand { get; set; }
-
         public RelayCommand QuickCompareCommand { get; set; }
         public RelayCommand ExternCompareCommand { get; set; }
+        public RelayCommand WriteAssemblyMigrationToDbCommand { get; set; }
+        public RelayCommand WriteMigrationFromFileCommand { get; set; }
 
         public MainWindowViewmodel()
         {
@@ -45,7 +48,7 @@ namespace EfMigrationTool.View
 #if DEBUG
             DbConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=EfMigrationTool.DemoApp.DemoContext;Integrated Security=True";
             MigrationAssembly = "EfMigrationTool.DemoApp.exe";
-            SettingsStore.WriteDefaultSettings();
+            _settingsStore.WriteDefaultSettings();
 #endif
             ReadMigrationsFromAssemblyCommand = new RelayCommand(ReadMigrationsFromAssembly);
             ReadMigrationsFromDbCommand = new RelayCommand(ReadMigrationsFromDb);
@@ -54,21 +57,60 @@ namespace EfMigrationTool.View
             DumpDbMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedDbMigration));
             QuickCompareCommand = new RelayCommand(QuickCompare);
             ExternCompareCommand = new RelayCommand(
-                ()=>
+                () =>
                 ExternCompare(
                     _settingsStore.GetSettingValue(SettingKeyEnum.DiffToolPath),
                     _settingsStore.GetSettingValue(SettingKeyEnum.DiffToolPattern)));
+
+            WriteAssemblyMigrationToDbCommand = new RelayCommand(WriteAssemblyMigrationToDb);
+            WriteMigrationFromFileCommand = new RelayCommand(WriteMigrationFromFile);
+        }
+
+        private void WriteMigrationFromFile()
+        {
+            if (
+                MigrationFilePath != null &&
+                File.Exists(MigrationFilePath) &&
+                SelectedDbMigration != null)
+            {
+                var edmxContent = File.ReadAllText(MigrationFilePath);
+                var changedMigration = new MigrationInfo
+                {
+                    MigrationId = SelectedDbMigration.MigrationId,
+                    Source = SelectedDbMigration.Source,
+                    ModelBlobb = _migrationDecoder.GetBytesFromEdmxContent(edmxContent)
+                };
+
+                _migrationScanner.UpdateMigration(changedMigration, DbConnectionString);
+            }
+        }
+
+        private void WriteAssemblyMigrationToDb()
+        {
+            if (
+                SelectedAssemblyMigration != null &&
+                SelectedDbMigration != null)
+            {
+                var changedMigration = new MigrationInfo
+                {
+                    MigrationId = SelectedDbMigration.MigrationId,
+                    Source = SelectedDbMigration.Source,
+                    ModelBlobb = SelectedAssemblyMigration.ModelBlobb
+                };
+
+                _migrationScanner.UpdateMigration(changedMigration, DbConnectionString);
+            }
         }
 
         private void ExternCompare(string diffToolPath, string diffToolPattern)
         {
-            if(SelectedAssemblyMigration != null &&
+            if (SelectedAssemblyMigration != null &&
                 SelectedDbMigration != null)
             {
                 _migrationComparer.CompareMigrationsInExternTool(
-                    SelectedDbMigration, 
-                    SelectedAssemblyMigration, 
-                    diffToolPath, 
+                    SelectedAssemblyMigration,
+                    SelectedDbMigration,
+                    diffToolPath,
                     diffToolPattern);
             }
         }
@@ -98,7 +140,9 @@ namespace EfMigrationTool.View
         {
             if (migration != null)
             {
-                _migrationFileOperations.WriteMigrationToFile(migration);
+                var targetFile = _migrationFileOperations.WriteMigrationToFile(migration);
+                MigrationFilePath = targetFile;
+                RaisePropertyChanged("MigrationFilePath");
             }
         }
 

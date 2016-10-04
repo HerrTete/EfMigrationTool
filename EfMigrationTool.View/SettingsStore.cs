@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Configuration;
+using System.Linq;
 
 namespace EfMigrationTool.View
 {
@@ -13,18 +14,29 @@ namespace EfMigrationTool.View
             _config = ConfigurationManager.OpenExeConfiguration(executingAssembly);
         }
 
-        public static void WriteDefaultSettings()
+        public void WriteDefaultSettings()
         {
-            var executingAssembly = Assembly.GetExecutingAssembly().Location;
-            var config = ConfigurationManager.OpenExeConfiguration(executingAssembly);
-            config.AppSettings.Settings.Add(SettingKeyEnum.DiffToolPath.ToString(), "C:\\Program Files (x86)\\WinMerge\\WinMergeU.exe");
-            config.AppSettings.Settings.Add(SettingKeyEnum.DiffToolPattern.ToString(), "{file1} {file2}");
-            config.Save(ConfigurationSaveMode.Minimal);
+            AppendSetting(SettingKeyEnum.DiffToolPath, "C:\\Program Files (x86)\\WinMerge\\WinMergeU.exe");
+            AppendSetting(SettingKeyEnum.DiffToolPattern, "{file1} {file2}");
+            _config.Save(ConfigurationSaveMode.Minimal);
+        }
+
+        public void AppendSetting(SettingKeyEnum key, string value)
+        {
+
+            if (GetSettingValue(key) == null)
+            {
+                _config.AppSettings.Settings.Add(key.ToString(), value);
+            }
         }
 
         public string GetSettingValue(SettingKeyEnum key)
         {
-            var value = _config.AppSettings.Settings[key.ToString()].Value;
+            string value = null;
+            if(_config.AppSettings.Settings.AllKeys.ToList().Contains(key.ToString()))
+            {
+                value = _config.AppSettings.Settings[key.ToString()].Value;
+            }
             return value;
         }
     }

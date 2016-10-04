@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity.Migrations.Infrastructure;
 using System.Data.SqlClient;
 using System.IO;
@@ -71,6 +72,17 @@ namespace EfMigrationTool.Core
             }
 
             return dbMigrations;
+        }
+
+        public void UpdateMigration(MigrationInfo migrationInfo, string connectionString)
+        {
+            var sqlQuery = "Update __MigrationHistory set Model = @modelBinary where MigrationId = @migrationId";
+            var sqlConnection = new SqlConnection(connectionString);
+            var sqlCommand = new SqlCommand(sqlQuery, sqlConnection);
+            sqlCommand.Parameters.Add("@modelBinary", SqlDbType.VarBinary, migrationInfo.ModelBlobb.Length).Value = migrationInfo.ModelBlobb;
+            sqlCommand.Parameters.Add("@migrationId", SqlDbType.NVarChar).Value = migrationInfo.MigrationId;
+            sqlConnection.Open();
+            var affectedRows = sqlCommand.ExecuteNonQuery();
         }
     }
 }

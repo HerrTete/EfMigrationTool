@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace EfMigrationTool.Core
 {
@@ -51,6 +52,30 @@ namespace EfMigrationTool.Core
             }
 
             return edmxContent;
+        }
+        public byte[] GetBytesFromEdmxContent(string edmxContent)
+        {
+            byte[] bytes = null;
+
+            try
+            {
+                using (MemoryStream outStream = new MemoryStream())
+                {
+                    using (GZipStream gzipStream = new GZipStream(outStream, CompressionMode.Compress))
+                    using (MemoryStream srcStream = new MemoryStream(Encoding.Default.GetBytes(edmxContent)))
+                    {
+                        srcStream.CopyTo(gzipStream);
+                    }
+                    bytes = outStream.ToArray();
+                }
+            }
+            catch (Exception exception)
+            {
+                Trace.WriteLine("Exception[GetBytesFromEdmxContent]");
+                Trace.WriteLine(exception);
+            }
+
+            return bytes;
         }
 
 
