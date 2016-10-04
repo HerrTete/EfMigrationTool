@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EfMigrationTool.Core
 {
@@ -32,15 +30,16 @@ namespace EfMigrationTool.Core
             return compareResult;
         }
 
-        public void CompareMigrationsInExternTool(MigrationInfo migration1, MigrationInfo migration2, string toolStartPattern)
+        public void CompareMigrationsInExternTool(MigrationInfo migration1, MigrationInfo migration2, string externtoolPath, string toolStartPattern)
         {
             var file1 = _migrationFileOperations.WriteMigrationToFile(migration1);
             var file2 = _migrationFileOperations.WriteMigrationToFile(migration2);
-            
-            var command = toolStartPattern.Replace("{file1}", "\"" + file1 + "\"");
+
+            var command = toolStartPattern;
+            command = command.Replace("{file1}", "\"" + file1 + "\"");
             command = command.Replace("{file2}", "\"" + file2 + "\"");
 
-            Process.Start(command);
+            Process.Start(externtoolPath, command);
         }
 
         public string CompareMigrationSets(List<MigrationInfo> source, List<MigrationInfo> target)

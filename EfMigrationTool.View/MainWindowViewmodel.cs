@@ -14,6 +14,8 @@ namespace EfMigrationTool.View
         private MigrationComparer _migrationComparer;
         private MigrationFileOperations _migrationFileOperations;
 
+        private SettingsStore _settingsStore;
+
         public string MigrationAssembly { get; set; }
         public string DbConnectionString { get; set; }
         public List<MigrationInfo> AssemblyMigrations { get; set; }
@@ -39,9 +41,11 @@ namespace EfMigrationTool.View
             _migrationComparer = new MigrationComparer();
             _migrationFileOperations = new MigrationFileOperations();
 
+            _settingsStore = new SettingsStore();
 #if DEBUG
             DbConnectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=EfMigrationTool.DemoApp.DemoContext;Integrated Security=True";
             MigrationAssembly = "EfMigrationTool.DemoApp.exe";
+            SettingsStore.WriteDefaultSettings();
 #endif
             ReadMigrationsFromAssemblyCommand = new RelayCommand(ReadMigrationsFromAssembly);
             ReadMigrationsFromDbCommand = new RelayCommand(ReadMigrationsFromDb);
@@ -49,16 +53,23 @@ namespace EfMigrationTool.View
             DumpAssemblyMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedAssemblyMigration));
             DumpDbMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedDbMigration));
             QuickCompareCommand = new RelayCommand(QuickCompare);
-            ExternCompareCommand = new RelayCommand(ExternCompare);
+            ExternCompareCommand = new RelayCommand(
+                ()=>
+                ExternCompare(
+                    _settingsStore.GetSettingValue(SettingKeyEnum.DiffToolPath),
+                    _settingsStore.GetSettingValue(SettingKeyEnum.DiffToolPattern)));
         }
 
-        private void ExternCompare()
+        private void ExternCompare(string diffToolPath, string diffToolPattern)
         {
             if(SelectedAssemblyMigration != null &&
                 SelectedDbMigration != null)
             {
-                var toolPattern = @"C:\Program Files (x86)\WinMerge\WinMergeU.exe {file1} {file2}";
-                _migrationComparer.CompareMigrationsInExternTool(SelectedDbMigration, SelectedAssemblyMigration, toolPattern);
+                _migrationComparer.CompareMigrationsInExternTool(
+                    SelectedDbMigration, 
+                    SelectedAssemblyMigration, 
+                    diffToolPath, 
+                    diffToolPattern);
             }
         }
 
