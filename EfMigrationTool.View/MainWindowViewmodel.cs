@@ -29,6 +29,7 @@ namespace EfMigrationTool.View
         public RelayCommand DumpDbMigrationCommand { get; set; }
 
         public RelayCommand QuickCompareCommand { get; set; }
+        public RelayCommand ExternCompareCommand { get; set; }
 
         public MainWindowViewmodel()
         {
@@ -48,6 +49,17 @@ namespace EfMigrationTool.View
             DumpAssemblyMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedAssemblyMigration));
             DumpDbMigrationCommand = new RelayCommand(() => DumpMigrationInfo(SelectedDbMigration));
             QuickCompareCommand = new RelayCommand(QuickCompare);
+            ExternCompareCommand = new RelayCommand(ExternCompare);
+        }
+
+        private void ExternCompare()
+        {
+            if(SelectedAssemblyMigration != null &&
+                SelectedDbMigration != null)
+            {
+                var toolPattern = @"C:\Program Files (x86)\WinMerge\WinMergeU.exe {file1} {file2}";
+                _migrationComparer.CompareMigrationsInExternTool(SelectedDbMigration, SelectedAssemblyMigration, toolPattern);
+            }
         }
 
         private void QuickCompare()

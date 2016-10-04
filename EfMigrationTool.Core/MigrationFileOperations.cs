@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EfMigrationTool.Core
 {
@@ -15,10 +11,13 @@ namespace EfMigrationTool.Core
         {
             _migrationDecoder = new MigrationDecoder();
         }
-        public void WriteMigrationToFile(MigrationInfo migration)
+        public string WriteMigrationToFile(MigrationInfo migration, string path = null)
         {
             var edmxContent = _migrationDecoder.GetEdmxContentForMigration(migration.ModelBlobb);
-            File.WriteAllText(migration.Source.ToString() + "_" + migration.MigrationId + ".edmx", edmxContent);
+            var filename = migration.Source.ToString() + "_" + migration.MigrationId + ".edmx";
+            var targetpath = Path.Combine(path ?? Environment.CurrentDirectory, filename);
+            File.WriteAllText(targetpath, edmxContent);
+            return targetpath;
         }
     }
 }

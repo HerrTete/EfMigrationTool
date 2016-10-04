@@ -32,6 +32,7 @@
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
             <Button Margin="5" Content="QuickCompare" Command="{Binding QuickCompareCommand}"/>
             <TextBlock Margin="5" Text="{Binding CompareResult}"/>
+            <Button Margin="5" Content="Compare in extern tool" Command="{Binding ExternCompareCommand}"/>
         </StackPanel>
     </Grid>
 </Window>
