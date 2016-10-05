@@ -13,6 +13,12 @@ namespace EfMigrationTool.Core
 {
     public class MigrationScanner
     {
+        private AssemblyResolver _assemblyResolver;
+
+        public MigrationScanner()
+        {
+            _assemblyResolver = new AssemblyResolver();
+        }
         public List<Type> ScanAssemblyForMigrationsTypes(string filename)
         {
             List<Type> migrationTypes = null;
@@ -22,18 +28,37 @@ namespace EfMigrationTool.Core
                 migrationTypes = new List<Type>();
 
                 var fullpath = Path.GetFullPath(filename);
+                var path = Path.GetFullPath(Path.Combine(fullpath, "..\\"));
+
                 var assembly = Assembly.LoadFile(fullpath);
-                foreach (var type in assembly.GetTypes())
+                
+                _assemblyResolver.SearchPath = path;
+
+                _assemblyResolver.LoadReferences(assembly);
+
+                try
                 {
-                    if (type.GetInterfaces().ToList().Contains(typeof(IMigrationMetadata)))
+                    foreach (var type in assembly.GetTypes())
                     {
-                        migrationTypes.Add(type);
+                        if (type.GetInterfaces().ToList().Contains(typeof(IMigrationMetadata)))
+                        {
+                            migrationTypes.Add(type);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (ex is System.Reflection.ReflectionTypeLoadException)
+                    {
+                        var typeLoadException = ex as ReflectionTypeLoadException;
+                        var loaderExceptions = typeLoadException.LoaderExceptions;
                     }
                 }
             }
 
             return migrationTypes;
         }
+
         public List<MigrationInfo> ScanAssemblyForMigrations(string filename)
         {
             var migrations = new List<MigrationInfo>();

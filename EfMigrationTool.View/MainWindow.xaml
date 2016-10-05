@@ -5,37 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EfMigrationTool.View"
         mc:Ignorable="d"
-        Title="EfMigrationTool" Height="600" Width="800">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0">
-            <TextBlock Margin="5" Text="MigrationAssembly: "/>
-            <TextBox Margin="5" Text="{Binding MigrationAssembly}"/>
-            <Button Margin="5" Content="Read migrations" Command="{Binding ReadMigrationsFromAssemblyCommand}"/>
-            <ListView Margin="5" ItemsSource="{Binding AssemblyMigrations}" DisplayMemberPath="MigrationId" SelectedItem="{Binding SelectedAssemblyMigration}"/>
-            <Button Margin="5" Content="Dump migration" Command="{Binding DumpAssemblyMigrationCommand}"/>
-        </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="0">
-            <TextBlock Margin="5" Text="DbConnectionString: "/>
-            <TextBox Margin="5" Text="{Binding DbConnectionString}"/>
-            <Button Margin="5" Content="Read migrations" Command="{Binding ReadMigrationsFromDbCommand}"/>
-            <ListView Margin="5" ItemsSource="{Binding DbMigrations}" DisplayMemberPath="MigrationId" SelectedItem="{Binding SelectedDbMigration}"/>
-            <Button Margin="5" Content="Dump migration" Command="{Binding DumpDbMigrationCommand}"/>
-            <Button Margin="5" Content="Write assemblyMigration" Command="{Binding WriteAssemblyMigrationToDbCommand}"/>
-            <Button Margin="5,5,5,2" Content="Write migration from File:" Command="{Binding WriteMigrationFromFileCommand}"/>
-            <TextBox Margin="5,2,5,5" Text="{Binding MigrationFilePath}"/>
-        </StackPanel>
-        <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
-            <Button Margin="5" Content="QuickCompare" Command="{Binding QuickCompareCommand}"/>
-            <TextBlock Margin="5" Text="{Binding CompareResult}"/>
-            <Button Margin="5" Content="Compare in extern tool" Command="{Binding ExternCompareCommand}"/>
-        </StackPanel>
-    </Grid>
+        Title="EfMigrationTool" Height="600" Width="800" SizeToContent="WidthAndHeight">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Grid.Row="0">
+                <TextBlock Margin="5" Text="MigrationAssembly: "/>
+                <TextBox Margin="5" Text="{Binding MigrationAssembly}"/>
+                <Button Margin="5" Content="Read migrations" Command="{Binding ReadMigrationsFromAssemblyCommand}"/>
+                <ListView Margin="5" ItemsSource="{Binding AssemblyMigrations}" DisplayMemberPath="MigrationId" SelectedItem="{Binding SelectedAssemblyMigration}"/>
+                <Button Margin="5" Content="Dump migration" Command="{Binding DumpAssemblyMigrationCommand}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Grid.Row="0">
+                <TextBlock Margin="5" Text="DbConnectionString: "/>
+                <TextBox Margin="5" Text="{Binding DbConnectionString}"/>
+                <Button Margin="5" Content="Read migrations" Command="{Binding ReadMigrationsFromDbCommand}"/>
+                <ListView Margin="5" ItemsSource="{Binding DbMigrations}" DisplayMemberPath="MigrationId" SelectedItem="{Binding SelectedDbMigration}"/>
+                <Button Margin="5" Content="Dump migration" Command="{Binding DumpDbMigrationCommand}"/>
+                <Button Margin="5" Content="Write assemblyMigration" Command="{Binding WriteAssemblyMigrationToDbCommand}"/>
+                <Button Margin="5,5,5,2" Content="Write migration from File:" Command="{Binding WriteMigrationFromFileCommand}"/>
+                <TextBox Margin="5,2,5,5" Text="{Binding MigrationFilePath}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
+                <Button Margin="5" Content="QuickCompare" Command="{Binding QuickCompareCommand}"/>
+                <TextBlock Margin="5" Text="{Binding CompareResult}"/>
+                <Button Margin="5" Content="Compare in extern tool" Command="{Binding ExternCompareCommand}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Window>
