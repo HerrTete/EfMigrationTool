@@ -135,10 +135,6 @@
       <Project>{162ED58F-FE7C-493A-AA27-8879F0067804}</Project>
       <Name>EfMigrationTool.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\EfMigrationTool.DemoApp\EfMigrationTool.DemoApp.csproj">
-      <Project>{d54280ae-93de-47ee-a5b2-cc926dc3d49e}</Project>
-      <Name>EfMigrationTool.DemoApp</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
