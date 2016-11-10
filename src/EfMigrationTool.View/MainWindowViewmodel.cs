@@ -148,7 +148,8 @@ namespace EfMigrationTool.View
 
         private void ReadMigrationsFromAssembly()
         {
-            AssemblyMigrations = _migrationScanner.ScanAssemblyForMigrations(MigrationAssembly);
+            AssemblyMigrations = _migrationScanner.ScanAssemblyForMigrations(MigrationAssembly).
+                OrderBy(x => x.MigrationId).ToList();
 
             if (AssemblyMigrations.Count > 0)
             {
@@ -161,7 +162,8 @@ namespace EfMigrationTool.View
 
         private void ReadMigrationsFromDb()
         {
-            DbMigrations = _migrationScanner.ScanDataBaseForMigrations(DbConnectionString);
+            DbMigrations = _migrationScanner.ScanDataBaseForMigrations(DbConnectionString).
+                OrderBy(x => x.MigrationId).ToList();
 
             if (DbMigrations.Count > 0)
             {
